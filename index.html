@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WiFi Restaurant & Cafe - مراجعات العملاء</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles for the premium look and feel */
@@ -21,7 +20,8 @@
             width: 8px;
         }
         ::-webkit-scrollbar-thumb {
-            background-color: #3f3f46; /* Gray-700 */
+            background-color: #3f3f46;
+            /* Gray-700 */
             border-radius: 4px;
         }
         ::-webkit-scrollbar-track {
@@ -31,7 +31,6 @@
 </head>
 <body class="min-h-screen text-white flex flex-col items-center p-4 sm:p-8">
 
-    <!-- Firebase SDK Imports -->
     <script type="module">
         // Added 'getDocs' for the submission limit check
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -40,19 +39,22 @@
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Use the globally available variables for Firebase setup
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        let firebaseConfig = {};
-        try {
-            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        } catch (e) {
-            console.error("Failed to parse firebase config:", e);
-        }
-
+        const appId = typeof __app_id !== 'undefined' ?
+        __app_id : 'default-app-id';
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDCuuSOG1rpSq4WclvR2anqTpn4LjsY_0g",
+  authDomain: "wifi-reviews.firebaseapp.com",
+  projectId: "wifi-reviews",
+  storageBucket: "wifi-reviews.firebasestorage.app",
+  messagingSenderId: "1040632139971",
+  appId: "1:1040632139971:web:8a6450cd422d176ca51276",
+  measurementId: "G-0Y032VRX03"
+};
         const reviewForm = document.getElementById('reviewForm');
         const ratingDisplay = document.getElementById('ratingDisplay');
         const messageBox = document.getElementById('messageBox');
         const recentReviewsListContainer = document.getElementById('recentReviewsListContainer');
-
         let currentRatings = { food: 0, service: 0 }; // Local state for the form
 
         if (Object.keys(firebaseConfig).length > 0) {
@@ -66,24 +68,27 @@
             window.Timestamp = Timestamp;
             // Public data collection for global reviews
             window.reviewsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'restaurant_reviews');
-
             // Authentication (Silent Sign-in)
             onAuthStateChanged(auth, async (user) => {
                 if (!user) {
                     try {
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+           
                             await signInWithCustomToken(auth, __initial_auth_token);
                         } else {
                             // Sign in anonymously for public access
+                     
                             await signInAnonymously(auth);
                         }
                         console.log("Authentication successful.");
                     } catch (error) {
+                    
                         console.error("Authentication failed:", error);
                     }
                 }
                 // Once authenticated, start listening for data
                 if (auth.currentUser) {
+                  
                     window.userId = auth.currentUser.uid;
                     startRealtimeListener();
                 } else {
@@ -92,7 +97,6 @@
                     startRealtimeListener();
                 }
             });
-
         } else {
             console.error("Firebase is not configured. Review system will not function.");
             recentReviewsListContainer.innerHTML = '<p class="text-red-400 text-center p-6">فشل تهيئة قاعدة البيانات. لا يمكن عرض المراجعات.</p>';
@@ -126,7 +130,6 @@
                 star.dataset.type = ratingType;
 
                 star.innerHTML = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>';
-                
                 star.addEventListener('click', () => {
                     currentRatings[ratingType] = i;
                     renderStars(containerId, ratingType); // Re-render to update colors
@@ -147,28 +150,30 @@
             
             let totalReviewsCount = 0;
             let overallTotalStars = 0;
-
             reviews.forEach(review => {
                 // Ensure timestamp exists before using it
                 if (!review.timestamp || !review.timestamp.toDate) return;
                 
                 const timestamp = review.timestamp.toDate();
                 
+     
                 // Calculate average of the two categories for this review
                 const overallReviewRating = (review.foodRating + review.serviceRating) / 2;
                 overallTotalStars += overallReviewRating;
                 totalReviewsCount++; // Count all reviews for overall average
 
+                
                 // Time filtering
                 if (timestamp >= oneDayAgo) dailyRatings.push(overallReviewRating);
                 if (timestamp >= oneWeekAgo) weeklyRatings.push(overallReviewRating);
                 if (timestamp >= oneMonthAgo) monthlyRatings.push(overallReviewRating);
             });
-
             // Calculate overall average for display
-            const formatAvg = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '0.0';
+            const formatAvg = (arr) => arr.length > 0 ?
+            (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '0.0';
             
-            const totalAverage = totalReviewsCount > 0 ? (overallTotalStars / totalReviewsCount).toFixed(1) : '0.0';
+            const totalAverage = totalReviewsCount > 0 ?
+            (overallTotalStars / totalReviewsCount).toFixed(1) : '0.0';
 
             return {
                 totalAverage,
@@ -176,6 +181,7 @@
                 weekly: formatAvg(weeklyRatings),
                 monthly: formatAvg(monthlyRatings),
                 totalCount: totalReviewsCount
+          
             };
         }
         
@@ -183,7 +189,6 @@
             const fullStars = Math.floor(rating);
             const fractional = rating - fullStars;
             let stars = '';
-
             // Full stars
             for (let i = 0; i < fullStars; i++) {
                 stars += `<svg viewBox="0 0 24 24" fill="#F97316" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${size}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
@@ -196,9 +201,11 @@
                 stars += `<svg viewBox="0 0 24 24" class="${size} relative">
                             <defs>
                                 <linearGradient id="${uniqueId}">
+                          
                                     <stop offset="${(fractional * 100)}%" stop-color="#F97316" />
                                     <stop offset="${(fractional * 100)}%" stop-color="#4b5563" />
                                 </linearGradient>
+            
                             </defs>
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#${uniqueId})" stroke="#4b5563" stroke-width="1.5"></polygon>
                         </svg>`;
@@ -224,25 +231,31 @@
                 <div class="p-6 bg-gray-800 rounded-2xl shadow-xl border-4 border-orange-500 w-full">
                     <div class="text-center mb-6">
                         <p class="text-3xl font-bold text-white mb-2">متوسط التقييم العام</p>
+                   
                         <div class="flex items-center justify-center space-x-2">
                             <span class="text-6xl font-extrabold text-orange-500">${averages.totalAverage}</span>
                             <span class="text-3xl text-gray-400">/ 5</span>
                         </div>
+     
                         ${getStarHTML(totalAverage, 'w-10 h-10')}
                         <p class="text-sm text-gray-400 mt-2">${averages.totalCount} مراجعة إجمالية</p>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4 text-center border-t border-gray-700 pt-4">
+   
                         <div class="p-2 bg-gray-900 rounded-xl">
                             <p class="text-lg font-semibold text-orange-500">${averages.daily}</p>
                             <p class="text-xs text-gray-400">يومي</p>
+               
                         </div>
                         <div class="p-2 bg-gray-900 rounded-xl">
                             <p class="text-lg font-semibold text-orange-500">${averages.weekly}</p>
                             <p class="text-xs text-gray-400">أسبوعي</p>
+   
                         </div>
                         <div class="p-2 bg-gray-900 rounded-xl">
                             <p class="text-lg font-semibold text-orange-500">${averages.monthly}</p>
+                     
                             <p class="text-xs text-gray-400">شهري</p>
                         </div>
                     </div>
@@ -252,15 +265,16 @@
 
         function renderRecentReviews(reviews) {
             if (!recentReviewsListContainer) return;
-
             if (reviews.length === 0) {
                 recentReviewsListContainer.innerHTML = `
                     <div class="p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
                         <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-3">أحدث المراجعات</h2>
-                        <p class="text-gray-400 text-center text-xl p-4">لا توجد مراجعات بعد. كن أول من يراجعنا!</p>
+                    
+                        <p class="text-gray-400 text-center text-xl p-4">لا توجد مراجعات بعد.
+                        كن أول من يراجعنا!</p>
                     </div>
                 `;
-                return;
+            return;
             }
 
             let html = '';
@@ -269,34 +283,42 @@
                 const serviceStars = getStarHTML(review.serviceRating, 'w-4 h-4');
                 const displayComment = review.comments || 'لا توجد تعليقات إضافية.';
                 // Ensure timestamp exists before using it
+          
                 const date = review.timestamp && review.timestamp.toDate ? review.timestamp.toDate().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'تاريخ غير معروف';
                 
                 // Displaying the reviewer's provided name
                 const reviewerName = review.customerName || 'مستخدم مجهول';
 
 
+                
                 html += `
                     <div class="bg-gray-700 p-5 rounded-xl border border-gray-600 shadow-md transform hover:scale-[1.01] transition duration-200">
                         <div class="flex justify-between items-center mb-3 border-b border-gray-600 pb-2">
                             <p class="text-md font-semibold text-orange-400">${reviewerName}</p>
+      
                             <p class="text-sm text-gray-400">${date}</p>
                         </div>
                         
                         <div class="space-y-3">
+   
                             <div class="flex justify-between items-center">
                                 <span class="text-md font-semibold text-gray-200">المأكولات:</span>
                                 ${foodStars}
+     
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-md font-semibold text-gray-200">الخدمة:</span>
+           
                                 ${serviceStars}
                             </div>
                         </div>
 
-                        <div class="mt-4 pt-3 border-t border-gray-600">
+                        <div class="mt-4 pt-3 
+                        border-t border-gray-600">
                             <p class="text-md font-semibold text-orange-400 mb-1">التعليق:</p>
                             <p class="text-gray-300 italic text-sm leading-relaxed">${displayComment}</p>
                         </div>
+           
                     </div>
                 `;
             });
@@ -306,13 +328,13 @@
                 <div class="p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
                     <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-3">أحدث المراجعات (10)</h2>
                     <div class="space-y-4 max-h-[600px] overflow-y-auto p-2">${html}</div>
+       
                 </div>
             `;
         }
 
         function startRealtimeListener() {
             if (!window.reviewsCollection) return;
-
             // Query to get the latest 10 reviews
             // NOTE: Firestore requires an index on 'timestamp' for this query.
             const reviewsQuery = query(window.reviewsCollection, orderBy('timestamp', 'desc'), limit(10));
@@ -322,12 +344,14 @@
                 const reviews = [];
                 snapshot.forEach(doc => {
                     reviews.push(doc.data());
+             
                 });
                 console.log("Realtime update received. Total reviews fetched:", reviews.length);
                 updateRatingDisplay(reviews);
                 renderRecentReviews(reviews);
             }, (error) => {
                 console.error("Error listening to reviews:", error);
+        
                 showMessage("فشل في تحميل المراجعات في الوقت الفعلي. تحقق من اتصالك.", 'error');
             });
         }
@@ -351,6 +375,7 @@
             const serviceRating = currentRatings.service;
             const comments = document.getElementById('comments').value.trim();
             const customerName = document.getElementById('customerName').value.trim();
+  
             const customerPhone = document.getElementById('customerPhone').value.trim();
 
 
@@ -358,6 +383,7 @@
             if (!customerName || !customerPhone || foodRating === 0 || serviceRating === 0) {
                 showMessage('الرجاء تعبئة الاسم ورقم الهاتف وتقييم كل من المأكولات والخدمة.', 'error');
                 return;
+  
             }
 
             const submitButton = document.getElementById('submitBtn');
@@ -365,7 +391,8 @@
             submitButton.textContent = '...جاري التحقق والإرسال';
 
             try {
-                if (!window.db || !window.reviewsCollection || !window.userId) {
+                if (!window.db ||
+                !window.reviewsCollection || !window.userId) {
                     throw new Error("Firebase or Collection not initialized, or user not authenticated.");
                 }
 
@@ -378,6 +405,7 @@
                     window.reviewsCollection,
                     where('userId', '==', window.userId), // Check only the current user's submissions
                     where('timestamp', '>=', startOfTodayTimestamp) // Check submissions made since midnight today
+               
                 );
                 
                 const snapshot = await getDocs(limitQuery);
@@ -393,11 +421,27 @@
                 await addDoc(window.reviewsCollection, {
                     foodRating: foodRating,
                     serviceRating: serviceRating,
+        
                     comments: comments,
                     customerName: customerName, // Added mandatory field
                     customerPhone: customerPhone, // Added mandatory field
                     timestamp: window.Timestamp.now(),
+                
                     userId: window.userId,
                 });
-
-                showMessage('شكرا
+                showMessage('شكراً لك على تقييمك! تم إرسال مراجعتك بنجاح.', 'success'); // Added complete success message
+            } catch (error) {
+                console.error("Error submitting review:", error);
+                showMessage(`حدث خطأ أثناء إرسال المراجعة: ${error.message}`, 'error');
+            } finally {
+                // Re-enable the button regardless of success or failure
+                submitButton.disabled = false;
+                submitButton.textContent = 'إرسال المراجعة';
+            }
+        });
+        // You should also call renderStars on page load for the initial state, assuming the HTML structure has elements with IDs 'foodRatingContainer' and 'serviceRatingContainer'
+        // renderStars('foodRatingContainer', 'food');
+        // renderStars('serviceRatingContainer', 'service');
+    </script>
+</body>
+</html>
